@@ -2,6 +2,8 @@ import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Plus, MessageSquare, Menu, X } from "lucide-react";
 import { useState } from "react";
+import { ThemeToggle } from "./ThemeToggle";
+import { SettingsDialog } from "./SettingsDialog";
 
 interface Conversation {
   id: string;
@@ -80,6 +82,11 @@ export const ChatSidebar = ({ conversations, activeId, onNewChat, onSelectChat }
               ))}
             </div>
           </ScrollArea>
+          
+          <div className="p-3 border-t border-border flex gap-2">
+            <ThemeToggle />
+            <SettingsDialog />
+          </div>
         </div>
       </aside>
 
