@@ -10,6 +10,7 @@ interface Message {
   id: string;
   role: "user" | "assistant";
   content: string;
+  files?: Array<{ name: string; type: string; data: string }>;
 }
 
 interface Conversation {
@@ -72,7 +73,15 @@ const Index = () => {
     }
   };
 
-  const handleSendMessage = async (content: string) => {
+  const handleDeleteChat = (id: string) => {
+    setConversations((prev) => prev.filter((conv) => conv.id !== id));
+    if (activeConversationId === id) {
+      const remaining = conversations.filter((conv) => conv.id !== id);
+      setActiveConversationId(remaining[0]?.id || null);
+    }
+  };
+
+  const handleSendMessage = async (content: string, files?: File[]) => {
     if (!activeConversationId) return;
 
     const ollamaUrl = localStorage.getItem("ollamaUrl");
@@ -85,10 +94,24 @@ const Index = () => {
       return;
     }
 
+    // Convert files to base64
+    const fileData = files ? await Promise.all(
+      files.map(async (file) => ({
+        name: file.name,
+        type: file.type,
+        data: await new Promise<string>((resolve) => {
+          const reader = new FileReader();
+          reader.onloadend = () => resolve(reader.result as string);
+          reader.readAsDataURL(file);
+        })
+      }))
+    ) : undefined;
+
     const userMessage: Message = {
       id: `m${Date.now()}`,
       role: "user",
       content,
+      files: fileData,
     };
 
     // Add user message
@@ -243,6 +266,7 @@ const Index = () => {
         activeId={activeConversationId}
         onNewChat={handleNewChat}
         onSelectChat={setActiveConversationId}
+        onDeleteChat={handleDeleteChat}
       />
 
       <main className="flex-1 flex flex-col min-w-0">
@@ -252,6 +276,7 @@ const Index = () => {
               key={message.id}
               role={message.role}
               content={message.content}
+              files={message.files}
               onRegenerate={
                 index === activeConversation.messages.length - 1 &&
                 message.role === "assistant"

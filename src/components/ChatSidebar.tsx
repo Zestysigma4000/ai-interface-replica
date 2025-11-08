@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Plus, MessageSquare, Menu, X } from "lucide-react";
+import { Plus, MessageSquare, Menu, X, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { ThemeToggle } from "./ThemeToggle";
 import { SettingsDialog } from "./SettingsDialog";
@@ -16,9 +16,10 @@ interface ChatSidebarProps {
   activeId: string | null;
   onNewChat: () => void;
   onSelectChat: (id: string) => void;
+  onDeleteChat: (id: string) => void;
 }
 
-export const ChatSidebar = ({ conversations, activeId, onNewChat, onSelectChat }: ChatSidebarProps) => {
+export const ChatSidebar = ({ conversations, activeId, onNewChat, onSelectChat, onDeleteChat }: ChatSidebarProps) => {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
@@ -57,16 +58,12 @@ export const ChatSidebar = ({ conversations, activeId, onNewChat, onSelectChat }
           <ScrollArea className="flex-1">
             <div className="p-2 space-y-1">
               {conversations.map((conversation) => (
-                <button
+                <div
                   key={conversation.id}
-                  onClick={() => {
-                    onSelectChat(conversation.id);
-                    setIsOpen(false);
-                  }}
                   className={`
                     w-full text-left px-3 py-2.5 rounded-lg
                     transition-colors duration-200
-                    flex items-center gap-3
+                    flex items-center gap-3 group
                     ${activeId === conversation.id
                       ? 'bg-sidebar-hover'
                       : 'hover:bg-sidebar-hover'
@@ -74,11 +71,28 @@ export const ChatSidebar = ({ conversations, activeId, onNewChat, onSelectChat }
                   `}
                 >
                   <MessageSquare className="h-4 w-4 flex-shrink-0 text-muted-foreground" />
-                  <div className="flex-1 min-w-0">
+                  <button
+                    onClick={() => {
+                      onSelectChat(conversation.id);
+                      setIsOpen(false);
+                    }}
+                    className="flex-1 min-w-0 text-left"
+                  >
                     <p className="text-sm truncate">{conversation.title}</p>
                     <p className="text-xs text-muted-foreground">{conversation.timestamp}</p>
-                  </div>
-                </button>
+                  </button>
+                  <Button
+                    size="icon"
+                    variant="ghost"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onDeleteChat(conversation.id);
+                    }}
+                    className="opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0 h-8 w-8"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </div>
               ))}
             </div>
           </ScrollArea>

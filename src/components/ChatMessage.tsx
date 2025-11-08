@@ -4,10 +4,11 @@ import { MessageActions } from "./MessageActions";
 interface ChatMessageProps {
   role: "user" | "assistant";
   content: string;
+  files?: Array<{ name: string; type: string; data: string }>;
   onRegenerate?: () => void;
 }
 
-export const ChatMessage = ({ role, content, onRegenerate }: ChatMessageProps) => {
+export const ChatMessage = ({ role, content, files, onRegenerate }: ChatMessageProps) => {
   const isUser = role === "user";
 
   return (
@@ -21,6 +22,25 @@ export const ChatMessage = ({ role, content, onRegenerate }: ChatMessageProps) =
         </div>
         <div className="flex-1 space-y-2 overflow-hidden">
           <p className="text-sm font-semibold">{isUser ? 'You' : 'Assistant'}</p>
+          {files && files.length > 0 && (
+            <div className="flex flex-wrap gap-2 mb-2">
+              {files.map((file, index) => (
+                <div key={index}>
+                  {file.type.startsWith('image/') ? (
+                    <img
+                      src={file.data}
+                      alt={file.name}
+                      className="max-w-xs rounded border border-border"
+                    />
+                  ) : (
+                    <div className="px-3 py-2 bg-muted rounded text-sm">
+                      📎 {file.name}
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
           <div className="prose prose-sm max-w-none">
             <p className="text-foreground whitespace-pre-wrap">{content}</p>
           </div>
